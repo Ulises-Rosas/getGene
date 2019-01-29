@@ -12,4 +12,4 @@ python3 ./geneTable.py -type "ft" --plot "Alopias pelagicus"
 ```
 By default filnames are composed by using species name as well as its title:
 
-![](https://github.com/Ulises-Rosas/geneTable/img/Alopias_pelagicus_GeneAvailability.png)
+![](https://github.com/Ulises-Rosas/geneTable/blob/master/img/Alopias_pelagicus_GeneAvailability.png)
