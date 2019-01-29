@@ -15,8 +15,8 @@ parser.add_argument('-type', metavar="Retrieval type",
 parser.add_argument('-db', metavar="Database",
                     default = "nuccore",
                     help='<nuccore, sra, ...>. Default: nuccore')
-parser.add_argument('-markers', metavar="Markers",
-                    default = "",
+parser.add_argument('--Qmarkers', metavar="Markers",
+                    default = "gene,rRNA,tRNA",
                     help='This option only works if Database is "nuccore". String storing markers (e.g. "COI,COX")')
 parser.add_argument('-Lmin', metavar="Minimum-Length",
                     default = "",
@@ -224,11 +224,11 @@ if str(args.db) == "nuccore" and args.type == "ft" and args.plot == True:
 
     c = entrez(term=str(args.string),
                type=str(args.type),
-               db=str(args.db)).feature_table( keyword = str(args.markers).split(",") )
+               db=str(args.db)).feature_table( keyword = str(args.Qmarkers).split(",") )
 
     arr = [i for i in range(0, c.__len__()) ]
 
-    print("Plotting...")
+    #print("Plotting...")
 
     plt.figure(figsize=(8, 5.5))
     plt.bar(arr
@@ -253,7 +253,7 @@ elif str(args.db) == "nuccore" and args.ids == False and args.plot == False:
     entrez(term=str(args.string),
            type=str(args.type),
            db=str(args.db),
-           gene_string=str(args.markers),
+           gene_string=str(args.Qmarkers),
            Lmin=str(args.Lmin),
            Lmax=str(args.Lmax),
            printing=True).get_seqs()
@@ -261,7 +261,7 @@ elif str(args.db) == "nuccore" and args.ids == False and args.plot == False:
 elif args.ids:
     for i in entrez(term=str(args.string),
                     db=str(args.db),
-                    gene_string=str(args.markers),
+                    gene_string=str(args.Qmarkers),
                     Lmin=str(args.Lmin),
                     Lmax=str(args.Lmax))._get_ids():
         print(i)
