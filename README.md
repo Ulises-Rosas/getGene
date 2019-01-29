@@ -10,6 +10,6 @@ Gene availability of given species by using feature table
 ```Bash
 python3 ./geneTable.py -type "ft" --plot "Alopias vulpinus"
 ```
-Filnames are composed by using species name as well as its title By default
+Filnames are composed by using species name as well as its title by default
 
 ![](https://github.com/Ulises-Rosas/geneTable/blob/master/img/Alopias_vulpinus_GeneAvailability.png)
