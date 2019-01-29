@@ -8,8 +8,8 @@ Gene availability of given species by using feature table
 ## Bar chart of gene availabilty 
 
 ```Bash
-python3 ./geneTable.py -type "ft" --plot "Alopias pelagicus" 
+python3 ./geneTable.py -type "ft" --plot "Alopias vulpinus"
 ```
 By default filnames are composed by using species name as well as its title:
 
-![](https://github.com/Ulises-Rosas/geneTable/blob/master/img/Alopias_pelagicus_GeneAvailability.png)
+![](https://github.com/Ulises-Rosas/geneTable/blob/master/img/Alopias_vulpinus_GeneAvailability.png)
