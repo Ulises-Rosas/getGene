@@ -8,7 +8,7 @@ Gene availability of given species by using feature table from NCBI's E-utilitie
 ## Bar chart of gene availabilty 
 
 ```Bash
-python3 ./geneTable.py -type "ft" --plot "Alopias vulpinus"
+python3 ./geneTable.py -type "ft" --plot "Alopias vulpinus" --cutOff 50 -cache 200
 ```
 Filnames are composed by using species name as well as its title by default
 
