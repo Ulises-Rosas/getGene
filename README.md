@@ -1,5 +1,5 @@
 # geneTable
-Gene availability of given species by using feature table
+Gene availability of given species by using feature table from NCBI's E-utilities
 
 ## Requirements
 * Python >=3.5
@@ -10,6 +10,6 @@ Gene availability of given species by using feature table
 ```Bash
 python3 ./geneTable.py -type "ft" --plot "Alopias vulpinus"
 ```
-By default filnames are composed by using species name as well as its title:
+Filnames are composed by using species name as well as its title by default
 
 ![](https://github.com/Ulises-Rosas/geneTable/blob/master/img/Alopias_vulpinus_GeneAvailability.png)
