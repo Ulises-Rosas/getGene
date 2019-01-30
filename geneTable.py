@@ -45,10 +45,10 @@ parser.add_argument('--plot',
                     action = 'store_true',
                     help='''plot in some specific functions''')
 parser.add_argument('--cutOff', metavar="Markers",
-                    default = None,
+                    default = 20,
                     help='Threshold value')
 parser.add_argument('-cache', metavar="Rate",
-                    default = 200,
+                    default = 100,
                     help='Number of sequences downloaded per loop. Default: 200')
 args = parser.parse_args()
 
@@ -279,7 +279,8 @@ if str(args.db) == "nuccore" and args.type == "ft" and args.plot == True:
 
     c = entrez(term=str(args.string),
                type=str(args.type),
-               db=str(args.db)).feature_table( keyword = str(args.Qmarkers).split(",")
+               db=str(args.db),
+               cache = int(args.cache)).feature_table( keyword = str(args.Qmarkers).split(",")
                                                , cutOff= args.cutOff  )
 
     if c == None:
