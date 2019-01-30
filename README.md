@@ -8,8 +8,8 @@ Gene availability of given species by using feature table from NCBI's E-utilitie
 ## Bar chart of gene availabilty 
 
 ```Bash
-python3 ./geneTable.py -type "ft" --plot "Alopias vulpinus" --cutOff 50 -cache 200
+python3 ./geneTable.py -type "ft" --plot "Oreochromis mossambicus" --cutOff 20
 ```
 Filnames are composed by using species name as well as its title by default
 
-![](https://github.com/Ulises-Rosas/geneTable/blob/master/img/Alopias_vulpinus_GeneAvailability.png)
+![](https://github.com/Ulises-Rosas/geneTable/blob/master/img/Oreochromis_mossambicus_GeneAvailability.png)
