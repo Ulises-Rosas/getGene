@@ -44,6 +44,9 @@ parser.add_argument('-ids',
 parser.add_argument('--plot',
                     action = 'store_true',
                     help='''plot in some specific functions''')
+parser.add_argument('--cutOff', metavar="Markers",
+                    default = None,
+                    help='Threshold value')
 parser.add_argument('-cache', metavar="Rate",
                     default = 200,
                     help='Number of sequences downloaded per loop. Default: 200')
@@ -147,9 +150,15 @@ class entrez:
 
             return string
 
-    def feature_table(self, keyword):
+    def feature_table(self, keyword, cutOff):
 
-        ids = self._get_ids()
+        #keyword = ["gene"]
+        #self = entrez(term= "Litopenaeus vannamei", db= "nuccore", type= "ft")
+        #self = entrez(term="Anguilla anguilla", db="nuccore", type="ft")
+
+        ids0 = self._get_ids()
+        #ids.__len__()
+        #ids0 = ids[0:2000]
 
         def GenesftByText(page, keyWords=["gene"]):
 
@@ -193,60 +202,110 @@ class entrez:
 
             return dict(Counter(allFeats))
 
-        dict1 = {}
+        #dict1 = {}
+        superPage = ''
 
-        i = 0
-        while ( i <= len(ids) ):
+        if ids0.__len__() <= 200:
 
-            complete_efetch_url = self.efetch_url +\
-                                  self.db +\
-                                  "&id=" +\
-                                  ",".join( ids[ i:i + self.cache ] ) +\
-                                  "&rettype=" +\
+            complete_efetch_url = self.efetch_url + \
+                                  self.db + \
+                                  "&id=" + \
+                                  ",".join(ids0) + \
+                                  "&rettype=" + \
                                   self.type
+            page = None
 
-            page = urllib.request.urlopen(complete_efetch_url).read().decode('utf-8')
+            while page is None:
+                try:
+                    page = urllib.request.urlopen(complete_efetch_url).read().decode('utf-8')
 
-            dict2 = GenesftByText(page = page,
-                                  keyWords= keyword)
+                except urllib.error.HTTPError:
+                    pass
 
-            dict1.update(dict2)
+            superPage += page
 
-            i += self.cache
+        else:
 
-        return dict(
-            sorted( dict1.items()
-                    , key =  lambda kv: kv[1]
-                    , reverse=True)
-        )
+            i = 0
+            while(  ids0.__len__() > i ):
+
+                complete_efetch_url = self.efetch_url + \
+                                      self.db + \
+                                      "&id=" + \
+                                      ",".join(ids0[i:i + self.cache]) + \
+                                      "&rettype=" + \
+                                      self.type
+                page = None
+
+                while page is None:
+                    try:
+                        page = urllib.request.urlopen(complete_efetch_url).read().decode('utf-8')
+
+                    except urllib.error.HTTPError:
+                        pass
+
+                superPage += page
+
+                i += self.cache
+
+                if i > ids0.__len__():
+
+                    print("progress: {0}/{0} tables downloaded".format( ids0.__len__() ) )
+                else:
+
+                    print("progress: {0}/{1} tables downloaded".format(i, ids0.__len__()))
+
+
+        dict1 = GenesftByText(page=superPage,
+                              keyWords=keyword)
+
+        if dict1.__len__() == 0:
+
+            return None
+        else:
+
+            sortedDict1 = sorted(dict1.items()
+                                 , key=lambda kv: kv[1]
+                                 , reverse=True)
+
+            if cutOff == None:
+
+                return dict(sortedDict1)
+            else:
+
+                return dict(sortedDict1[0:int(cutOff)])
 
 if str(args.db) == "nuccore" and args.type == "ft" and args.plot == True:
 
     c = entrez(term=str(args.string),
                type=str(args.type),
-               db=str(args.db)).feature_table( keyword = str(args.Qmarkers).split(",") )
+               db=str(args.db)).feature_table( keyword = str(args.Qmarkers).split(",")
+                                               , cutOff= args.cutOff  )
 
-    arr = [i for i in range(0, c.__len__()) ]
+    if c == None:
 
-    #print("Plotting...")
+        print( "Empty feature table under these --Qmarkers parameters: %s" % str(args.Qmarkers) )
+    else:
 
-    plt.figure(figsize=(8, 5.5))
-    plt.bar(arr
-            , c.values()
-            , align="center"
-            , alpha=0.5)
-    plt.xticks(arr
-               , c.keys()
-               , rotation=87)
-    plt.subplots_adjust(bottom=0.33)
-    plt.xlabel('Genes')
-    plt.ylabel('Frequency')
-    plt.title('Gene availability of %s' % str(args.string) )
-    plt.axhline(y=3
-                , color="black")
-    plt.savefig('%s_GeneAvailability.png' % str(args.string).replace(" ","_") )
-    plt.show(block = False)
-    plt.close()
+        arr = [i for i in range(0, c.__len__())]
+
+        plt.figure(figsize=(8, 5.5))
+        plt.bar(arr
+                , c.values()
+                , align="center"
+                , alpha=0.5)
+        plt.xticks(arr
+                   , c.keys()
+                   , rotation=87)
+        plt.subplots_adjust(bottom=0.33)
+        plt.xlabel('Genes')
+        plt.ylabel('Frequency')
+        plt.title('Gene availability of %s' % str(args.string))
+        plt.axhline(y=3
+                    , color="black")
+        plt.savefig('%s_GeneAvailability.png' % str(args.string).replace(" ", "_"))
+        plt.show(block=False)
+        plt.close()
 
 elif str(args.db) == "nuccore" and args.ids == False and args.plot == False:
 
