@@ -10,6 +10,6 @@ Gene availability of given species by using feature table from NCBI's E-utilitie
 ```Bash
 python3 ./geneTable.py -type "ft" --plot "Oreochromis mossambicus" --cutOff 20
 ```
-Filnames are composed by using species name as well as its title by default
-
 ![](https://github.com/Ulises-Rosas/geneTable/blob/master/img/Oreochromis_mossambicus_GeneAvailability.png)
+
+Filnames are composed by using species name as well as its title by default
