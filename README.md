@@ -12,4 +12,4 @@ python3 ./geneTable.py -type "ft" --plot "Oreochromis mossambicus" --cutOff 20
 ```
 ![](https://github.com/Ulises-Rosas/geneTable/blob/master/img/Oreochromis_mossambicus_GeneAvailability.png)
 
-Filnames are composed by using species name as well as its title by default
+Filnames are composed by using species name as well as its title by default. If there were more than 
