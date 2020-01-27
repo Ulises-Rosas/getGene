@@ -5,10 +5,20 @@ Gene availability of given species by using feature table from NCBI's E-utilitie
 * Python >=3.5
 * Matplotlib
 
+#### Installation
+
+Using `git`:
+
+```Shell
+git clone https://github.com/Ulises-Rosas/geneTable.git
+cd geneTable
+python3 setup.py install
+```
+
 ## Bar chart of gene availabilty 
 
 ```Bash
-python3 ./geneTable.py -type "ft" --plot "Oreochromis mossambicus" --cutOff 20
+geneTable.py -type "ft" --plot "Oreochromis mossambicus" --cutOff 20
 ```
 ![](https://github.com/Ulises-Rosas/geneTable/blob/master/img/Oreochromis_mossambicus_GeneAvailability.png)
 
