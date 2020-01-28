@@ -16,8 +16,9 @@ setup(name="genetable",
       packages = ['genetable'],
       package_dir = {'genetable': 'src'},
       scripts = ['src/geneTable.py'],
+      install_requires=['matplotlib'],
       classifiers = [
              'Programming Language :: Python :: 3',
              'License :: OSI Approved :: MIT License'
              ]
-     )
+    )
