@@ -51,7 +51,7 @@ class entrez:
         self.esarch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=" + \
                           self.db + "&term=" + self.term
 
-        self.efetch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db="
+        self.efetch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=" + self.db
 
         self.ids = []
 
@@ -76,6 +76,32 @@ class entrez:
 
         return self.ids
 
+    def _get_type(self, type = None):
+
+        if type is not None:
+            self.type = type
+
+        ids = self._get_ids() if not self.ids else self.ids
+
+        if not ids:
+            return None
+            
+        out = ""
+        i   = 0
+
+        while i <= len(ids):
+
+            target_url = self.efetch_url + \
+                         "&id=" + ",".join( ids[i:i + self.cache] ) + \
+                         "&rettype=" + self.type
+    
+            tmp_out    = urllib.request.urlopen(target_url).read().decode('utf-8')
+
+            out += tmp_out
+            i   += self.cache
+
+        return out
+
     def get_seqs(self,
                  ids=""):
 
@@ -83,14 +109,13 @@ class entrez:
             ids = self._get_ids()
 
         # delete this
-        # self = entrez(term= "JL554673:JL597291", termType= "[ACCN]", db = "nuccore", type = "fasta")
         # ids0 = self._get_ids()
         # ids = ids0[0:4]
 
         i = 0
         if self.printing:
             while (i <= len(ids)):
-                complete_efetch_url = self.efetch_url + self.db +\
+                complete_efetch_url = self.efetch_url +\
                                       "&id=" + ",".join( ids[i:i + self.cache] ) +\
                                       "&rettype=" + self.type
 
@@ -99,7 +124,7 @@ class entrez:
         else:
             string = ""
             while (i <= len(ids)):
-                complete_efetch_url = self.efetch_url + self.db +\
+                complete_efetch_url = self.efetch_url +\
                                       "&id=" + ",".join(ids[i:i + self.cache]) +\
                                       "&rettype=" + self.type
 
@@ -167,7 +192,6 @@ class entrez:
         if ids0.__len__() <= 200:
 
             complete_efetch_url = self.efetch_url + \
-                                  self.db + \
                                   "&id=" + \
                                   ",".join(ids0) + \
                                   "&rettype=" + \
@@ -189,7 +213,6 @@ class entrez:
             while(  ids0.__len__() > i ):
 
                 complete_efetch_url = self.efetch_url + \
-                                      self.db + \
                                       "&id=" + \
                                       ",".join(ids0[i:i + self.cache]) + \
                                       "&rettype=" + \

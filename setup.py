@@ -16,6 +16,11 @@ setup(name="genetable",
       packages = ['genetable'],
       package_dir = {'genetable': 'src'},
       scripts = ['src/geneTable.py'],
+      entry_points={
+        'console_scripts': [
+            'getGenomes = genetable.getGenomes:main'
+            ]
+      },
       install_requires=['matplotlib'],
       classifiers = [
              'Programming Language :: Python :: 3',
