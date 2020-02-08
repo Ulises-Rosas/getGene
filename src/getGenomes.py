@@ -2,6 +2,7 @@
 
 import argparse
 from genetable.entrez import entrez
+from genetable.utils import genomeDS, dictToPrint
 
 def getOpts():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -9,7 +10,7 @@ def getOpts():
                                      epilog="")
     parser.add_argument('term',
                         help='Term')
-    parser.add_argument('-l','--look',
+    parser.add_argument('-l','--lookup',
                         action="store_true",
                         help='[Optional] if selected, only obtain metadata')
     parser.add_argument('-o','--out',
@@ -24,15 +25,23 @@ def main():
 
     opts = getOpts()
 
-    if opts.look:
+    if opts.lookup:
         rawOut = entrez(
-                    term = opts.term,
+                    term = opts.term, # opts.term
                     db   = "genome" ,
                     type = "docsum"
                     )
 
         if rawOut is not None:
-            print( rawOut._get_type() )        
+            rowString  = rawOut._get_type()
+            dictString = genomeDS(rowString)
+            
+            frows      = dictToPrint(dictString)
+            
+            if opts.out is None:
+                for r in frows:
+                    print(r)
+            
 
 if __name__ == "__main__":
     main()
