@@ -15,10 +15,10 @@ setup(name="genetable",
       url='https://github.com/Ulises-Rosas/geneTable',
       packages = ['genetable'],
       package_dir = {'genetable': 'src'},
-      scripts = ['src/geneTable.py'],
       entry_points={
         'console_scripts': [
-            'getGenomes = genetable.getGenomes:main'
+            'getGenomes  = genetable.getGenomes:main',
+            'getFeatures = genetable.geneTable:main'
             ]
       },
       install_requires=['matplotlib'],
