@@ -1,10 +1,11 @@
 
 
 import re
-import urllib.request
 import argparse
-import matplotlib.pyplot as plt
+import urllib.request
 from collections import Counter
+import matplotlib.pyplot as plt
+from genetable.utils import GenesftByText
 
 class entrez:
 
@@ -144,48 +145,6 @@ class entrez:
         #ids.__len__()
         #ids0 = ids[0:2000]
 
-        def GenesftByText(page, keyWords=["gene"]):
-
-            feats = list(filter(None, page.split(">Feature ")))
-            # keyWords = ["gene", "rRNA", "tRNA"]
-
-            matchPattern = "[0-9<>\t]+%s\n[\t]+[A-Za-z]+\t.+?(?=\n)"
-            subPattern = "([0-9<>]+)\t([0-9<>]+)\t%s\n[\t]+[A-Za-z]+\t(.*)"
-
-            allFeats = []
-
-            for ft in feats:
-                # ft = feats[8]
-                # keyWords = ["gene", "rRNA"]
-                tmpRegions = []
-
-                for key in keyWords:
-
-                    tmpMatch = re.findall(matchPattern % key, ft)
-
-                    for mtchs in tmpMatch:
-                        tmpSub = re.sub(subPattern % key
-                                        , "\\1,\\2,\\3,%s" % key
-                                        , mtchs).replace("<", "").replace(">", "")
-
-                        tmpRegions.append(tmpSub)
-
-                positions = [",".join(i.split(',')[0:2]) for i in tmpRegions]
-
-                for josp in list(set(positions)):
-                    josr = [i for i in tmpRegions if re.findall(josp, i)]
-
-                    lenOfRegionName = [len(i.split(',')[2]) for i in josr]
-
-                    shortestWord = [x for _, x in sorted(zip(lenOfRegionName, josr))][0]
-
-                    allFeats.append(
-
-                        shortestWord.split(',')[2].lower()
-                    )
-
-            return dict(Counter(allFeats))
-
         #dict1 = {}
         superPage = ''
 
@@ -249,5 +208,5 @@ class entrez:
                                  , key     = lambda kv: kv[1]
                                  , reverse = True)
 
-            return dict(sortedDict1) if cutOff == None else dict(sortedDict1[0:int(cutOff)])
+            return dict(sortedDict1) if cutOff is None else dict(sortedDict1[0:int(cutOff)])
 

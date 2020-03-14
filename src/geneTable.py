@@ -1,71 +1,77 @@
 #!/usr/bin/env python3
 
 import re
-import urllib.request
+import sys
 import argparse
+import urllib.request
 import matplotlib.pyplot as plt
 from collections import Counter
-from entrez import entrez
+from genetable.entrez import entrez
+from genetable.utils import dictToCSV
 
-parser = argparse.ArgumentParser(description="Retrieve information by using API's utils")
+def getOpts():
 
-parser.add_argument('string', metavar='Term',
-                    help='Boolean string which will be used to search sequences')
-parser.add_argument('-type', metavar="Retrieval type",
-                    default = "fasta",
-                    help='<fasta, gb, ...>. Default: fasta')
-parser.add_argument('-db', metavar="Database",
-                    default = "nuccore",
-                    help='<nuccore, sra, ...>. Default: nuccore')
-parser.add_argument('--Qmarkers', metavar="Markers",
-                    default = "gene,rRNA,tRNA",
-                    help='This option only works if Database is "nuccore". String storing markers (e.g. "COI,COX")')
-parser.add_argument('-Lmin', metavar="Minimum-Length",
-                    default = "",
-                    help='This option only works if Database is "nuccore". Minimun length for downloaded sequences')
+    parser = argparse.ArgumentParser(description="Retrieve information from feature table")
 
-parser.add_argument('-Lmax', metavar="Maximun-Length",
-                    default = "",
-                    help='This option only works if Database is "nuccore". Maximun length for downloaded sequences')
-parser.add_argument('-ite',
-                    action = 'store_true',
-                    help='''This option only works if Retrieval type is "gb". This option allows to filter only
-                    species-level gg files of both term and group (see below).''')
-parser.add_argument('-group', metavar="Iterative",
-                    default = "Genus",
-                    help='''This option only works if Iterative mode is selected. This option allows to find only
-                     species-level "gb" files of a group selected (e.g. Genus). If there was not species-level "gb"
-                      files, this value will shift to a higher taxonomic rank (e.g. Family). Default: Genus''')
-parser.add_argument('-out', metavar="Iterative",
-                    default = "",
-                    help='''This option only works if Iterative mode is selected. File name of species-level "gb"
-                     files. Default: output.gb''')
-parser.add_argument('-ids',
-                    action = 'store_true',
-                    help='''Get ids of a given request''')
-parser.add_argument('--plot',
-                    action = 'store_true',
-                    help='''plot in some specific functions''')
-parser.add_argument('--cutOff', metavar="Markers",
-                    default = 20,
-                    help='Threshold value')
-parser.add_argument('-cache', metavar="Rate",
-                    default = 100,
-                    help='Number of sequences downloaded per loop. Default: 200')
-args = parser.parse_args()
+    parser.add_argument('string', 
+                        metavar='Term',
+                        type=str,
+                        help='Boolean string which will be used to search sequences')
+    parser.add_argument('-q','--qmarkers',
+                        metavar="",
+                        nargs = "+",
+                        default = ["gene","rRNA","tRNA"],
+                        help='[Optional] Query markers. String storing markers.[Default =  ["gene" "rRNA" "tRNA"]]')
+    parser.add_argument('-p','--plot',
+                        action = 'store_true',
+                        help='''[Optional] If selected, plot results''')
+    parser.add_argument('-y','--hline', metavar="",
+                        type = int,
+                        default = 3,
+                        help='[Optional] Horizontal line in the plot [Default: 3]')
+    parser.add_argument('-c','--cutoff', metavar="",
+                        default = 10,
+                        help='[Optional] Max number of genes at x-axis [Default: 20]')
+    parser.add_argument('-r','--cache', metavar="",
+                        type=int,
+                        default = 100,
+                        help='[Optional] Number of sequences downloaded per loop. [Default: 200]')
+    parser.add_argument('-o','--out', metavar="",
+                        default = None,
+                        type= str,
+                        help='''[Optional] output file''')
+    parser.add_argument('-s','--silent',
+                        action = 'store_true',
+                        help='''[Optional] If selected, running messages are suppressed''')
+    args = parser.parse_args()
 
-if str(args.db) == "nuccore" and args.type == "ft" and args.plot == True:
+    return args
 
-    c = entrez(term=str(args.string),
-               type=str(args.type),
-               db=str(args.db),
-               cache = int(args.cache)).feature_table( keyword = str(args.Qmarkers).split(",")
-                                               , cutOff= args.cutOff  )
+def main():
 
-    if c == None:
+    args = getOpts()
+    # print(args)
 
-        print( "Empty feature table under these --Qmarkers parameters: %s" % str(args.Qmarkers) )
-    else:
+    if not args.silent:
+        sys.stdout.write("\n")
+        sys.stdout.write("\rRetriving information from NCBI...")
+
+    # class calling
+    c = entrez(term = args.string,
+               type = "ft",
+               db   = "nuccore",
+               cache = args.cache).feature_table( keyword = args.qmarkers
+                                                  ,cutOff = args.cutoff  )
+    if c is None:
+        print( "Empty feature table under these --qmarkers parameters: %s" %  ", ".join(args.qmarkers) )
+        exit()
+
+    if not args.silent:
+        sys.stdout.write("\rRetriving information from NCBI...Ok\n")
+
+    outname = '%s_getFeatures' % args.string.replace(" ", "_") if args.out is None else args.out
+
+    if args.plot:
 
         arr = [i for i in range(0, c.__len__())]
 
@@ -75,32 +81,23 @@ if str(args.db) == "nuccore" and args.type == "ft" and args.plot == True:
                 , align="center"
                 , alpha=0.5)
         plt.xticks(arr
-                   , c.keys()
-                   , rotation=87)
+                , c.keys()
+                , rotation=87)
         plt.subplots_adjust(bottom=0.33)
         plt.xlabel('Genes')
         plt.ylabel('Frequency')
-        plt.title('Gene availability of %s' % str(args.string))
-        plt.axhline(y=3
-                    , color="black")
-        plt.savefig('%s_GeneAvailability.png' % str(args.string).replace(" ", "_"))
+        plt.title('Gene availability of %s' % args.string)
+        plt.axhline(y = args.hline
+                    , color = "black")
+        plt.savefig(outname + ".png")
         plt.show(block=False)
         plt.close()
 
-elif str(args.db) == "nuccore" and args.ids == False and args.plot == False:
+        if not args.silent:
+            sys.stdout.write("\n")
+            sys.stdout.write("Plot stored at %s\n" % (outname + ".png") )
 
-    entrez(term=str(args.string),
-           type=str(args.type),
-           db=str(args.db),
-           gene_string=str(args.Qmarkers),
-           Lmin=str(args.Lmin),
-           Lmax=str(args.Lmax),
-           printing=True).get_seqs()
+    dictToCSV(dic = c, outname = outname, sep = ",", quiet = args.silent)
 
-elif args.ids:
-    for i in entrez(term=str(args.string),
-                    db=str(args.db),
-                    gene_string=str(args.Qmarkers),
-                    Lmin=str(args.Lmin),
-                    Lmax=str(args.Lmax))._get_ids():
-        print(i)
+if __name__ == "__main__":
+    main()
