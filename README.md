@@ -1,10 +1,6 @@
 # geneTable
 Gene availability of given species by using feature table from NCBI's E-utilities
 
-## Requirements
-* Python >=3.5
-* Matplotlib
-
 #### Installation
 
 Using `git`:
