@@ -1,6 +1,6 @@
 # geneGet
 
-#### Installation
+## Installation
 
 Using `git`:
 
@@ -10,7 +10,7 @@ cd geneTable
 python3 setup.py install
 ```
 
-## Bar chart of gene availabilty 
+## Usage
 
 ```Bash
 getFeatures "Alopias vulpinus" -p
