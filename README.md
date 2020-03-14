@@ -1,5 +1,4 @@
 # geneGet
-Gene availability of given species by using feature table from NCBI's E-utilities
 
 #### Installation
 
