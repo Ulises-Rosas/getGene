@@ -19,7 +19,7 @@ def getOpts():
     parser.add_argument('-l','--lookup',
                         action="store_true",
                         help='[Optional] if selected, only obtain metadata')
-    parser.add_argument('-c','--columns',
+    parser.add_argument('-s','--columns',
                         action='store',
                         metavar="",
                         nargs= "+",
@@ -46,6 +46,12 @@ def getOpts():
                         action='store',
                         default=OUTDIR,
                         help='directory names where genomes will be store [Default = %s]' % OUTDIR 
+                        )
+    parser.add_argument('-c','--counterspps',
+                        metavar="",
+                        action='store',
+                        default=None,
+                        help='Counter sample of species [Default = %s]' % None
                         )
     args = parser.parse_args()
     return args
