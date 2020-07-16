@@ -13,19 +13,23 @@ from collections import Counter
 getMaxNu = lambda d: sorted([len(v) for _,v in d.items()], reverse = True)[0]
 
 def genomeDS(docsum):
-#    docsum = rawDoc
-    
-    pat1     = '^.+Name="(.+)" .+>(.{0,})</Item>$'
-    
-    nameItem = lambda s: re.sub(pat1, "\\1#\\2", s) if re.findall("</Item>$", s) else None
+#    docsum = rowString 
+    colpat   = '^.+Name="(.+)" .+>.{0,}</Item>$'
+    valpat   = '^.+Name=".+" .+>(.{0,})</Item>$'
+
     fulfill  = lambda d,n: {k: v + ( [""] * (n - len(v)) ) for k,v in d.items() }
-        
+
     sdocsum  = docsum.split("\n")
     
     out = {}
-    for i in filter(None, map(nameItem, sdocsum)):
-        
-        colname,val  = i.split("#")                        
+    for i in sdocsum:
+
+        if not re.findall("</Item>$", i):
+            continue
+
+        colname = re.sub(colpat, "\\1", i)
+        val     = re.sub(valpat, "\\1", i)
+
         out[colname] = out[colname] + [val] if out.__contains__(colname) else [val]
         
     return fulfill( out, getMaxNu(out) )
