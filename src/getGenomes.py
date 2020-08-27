@@ -88,7 +88,7 @@ def main():
             sys.stdout.write("\n")
 
     else:
-        sys.stdout.write("\nCheck term: %s" % opts.term)
+        sys.stdout.write("\nCheck term: %s\n" % opts.term)
         sys.stdout.flush()    
 
 if __name__ == "__main__":
