@@ -28,52 +28,97 @@ def getOpts():
     args = parser.parse_args()
     return args
 
-def formatmytype(mytype, countersamples):
 
-    tree = ET.fromstring(mytype)
+rela = '<Summary><Title>Trace experiment for center ABC, GENOMIC, species SALMO SALAR SALMON_HC_PLASMID</Title><Platform instrument_model="AB 310 Genetic Analyzer">CAPILLARY</Platform><Statistics total_runs="1" total_spots="50128" total_bases="47861202" total_size="1359885140" load_done="true" cluster_name="public"/></Summary><Submitter acc="SRA902384" center_name="ABC" contact_name="Inna Belaia" lab_name="ABC"/><Experiment acc="SRX6104069" ver="1" status="public" name="Trace experiment for center ABC, GENOMIC, species SALMO SALAR SALMON_HC_PLASMID"/><Study acc="SRP202122" name="Sequencing SALMO SALAR"/><Organism taxid="8030" CommonName="Atlantic salmon"/><Sample acc="SRS5002493" name="Atlantic salmon"/><Instrument CAPILLARY="AB 310 Genetic Analyzer"/><Library_descriptor><LIBRARY_NAME>SALMON_HC_PLASMID</LIBRARY_NAME><LIBRARY_STRATEGY>WGA</LIBRARY_STRATEGY><LIBRARY_SOURCE>GENOMIC</LIBRARY_SOURCE><LIBRARY_SELECTION>unspecified</LIBRARY_SELECTION><LIBRARY_LAYOUT> <SINGLE/> </LIBRARY_LAYOUT></Library_descriptor><Biosample>SAMN12109122</Biosample>'
 
-    out= []
+re.findall('ScientificName=', rela)
 
-    for child in tree:
+def checkmatch(mystr, exists, extract):
 
-        expxml = child[1].text
-        runa   = child[2].text
+    return re.sub(extract, "\\1", mystr) if re.findall(exists,mystr) else ""
 
-        if expxml:
+def formatmytype(mytypes, countersamples):
+    out = []
 
-            libsrcpatt = '.*<LIBRARY_SOURCE>(.+)</LIBRARY_SOURCE>.*'
-            srcname  = re.sub(libsrcpatt, "\\1", expxml)
+    for mytype in mytypes:
 
-            libstrpatt = '.*<LIBRARY_STRATEGY>(.+)</LIBRARY_STRATEGY>.*'
-            straname = re.sub(libstrpatt, "\\1", expxml)
+        tree = ET.fromstring(mytype)
 
-            platpatt = '.*instrument_model="(.*?)".*'
-            platname = re.sub(platpatt, "\\1", expxml)
+        for child in tree:
 
-            scipatt = '.*ScientificName="(.*?)".*'
-            sciname = re.sub(scipatt, "\\1", expxml)
+            expxml = child[1].text
+            runa   = child[2].text
 
-            if countersamples:
-                if sciname in countersamples:
-                    expxml = None
+            if expxml:
+                # libsrcpatt = '.*<LIBRARY_SOURCE>(.+)</LIBRARY_SOURCE>.*'
+                # srcname    = re.sub(libsrcpatt, "\\1", expxml)
+                srcname = checkmatch(
+                            expxml, 
+                            '<LIBRARY_SOURCE>',
+                            '.*<LIBRARY_SOURCE>(.+)</LIBRARY_SOURCE>.*'
+                        )
+                # libstrpatt = '.*<LIBRARY_STRATEGY>(.+)</LIBRARY_STRATEGY>.*'
+                # straname = re.sub(libstrpatt, "\\1", expxml)
+                straname = checkmatch(
+                                expxml,
+                                '<LIBRARY_STRATEGY>',
+                                '.*<LIBRARY_STRATEGY>(.+)</LIBRARY_STRATEGY>.*'
+                            )
+                # platpatt = '.*instrument_model="(.*?)".*'
+                # platname = re.sub(platpatt, "\\1", expxml)
+                platname = checkmatch(
+                                expxml,
+                                'instrument_model=',
+                                '.*instrument_model="(.*?)".*'
+                            )
+                # scipatt = '.*ScientificName="(.*?)".*'
+                # sciname = re.sub(scipatt, "\\1", expxml)
+                sciname = checkmatch(
+                                expxml,
+                                'ScientificName=',
+                                '.*ScientificName="(.*?)".*'
+                            )
 
-        if runa:
-            accpatt = '.* acc="(.*?)".*'
-            runacc  = re.sub(accpatt, "\\1", runa)
+                if countersamples:
+                    if (sciname in countersamples) or (not sciname):
+                        expxml = None
 
-            ispupatt = '.* is_public="(.*?)".*'
-            ispublic = re.sub(ispupatt, "\\1", runa)
-        
-        if expxml and runa:
-            tmp = {
-                'sciname'   : sciname,
-                'platname'  : platname,
-                'runacc'    : runacc,
-                'ispublic'  : ispublic,
-                'strategy'  : straname,
-                'lib_source': srcname
-            }
-            out.append(tmp)
+            if runa:
+                # accpatt = '.* acc="(.*?)".*'
+                # runacc  = re.sub(accpatt, "\\1", runa)
+                runacc  =  checkmatch(
+                                runa,
+                                'acc=',
+                                '.* acc="(.*?)".*'
+                            )
+
+                # ispupatt = '.* is_public="(.*?)".*'
+                # ispublic = re.sub(ispupatt, "\\1", runa)
+                ispublic = checkmatch(
+                                runa,
+                                'is_public=',
+                                '.* is_public="(.*?)".*'
+                            )
+
+                # basepatt = '.* total_bases="(.*?)".*'
+                # totalbase = re.sub(basepatt, "\\1", runa)
+                totalbase = checkmatch(
+                                runa,
+                                'total_bases=',
+                                '.* total_bases="(.*?)".*'
+                            )
+            
+            if expxml and runa:
+                tmp = {
+                    'sciname'    : sciname,
+                    'platname'   : platname,
+                    'runacc'     : runacc,
+                    'ispublic'   : ispublic,
+                    'strategy'   : straname,
+                    'lib_source' : srcname,
+                    'total_bases': totalbase
+                }
+                out.append(tmp)
 
     return out
 
@@ -83,6 +128,7 @@ def printthisout(results):
         sys.stdout.write(
             "\t".join([
                     'accession'   ,
+                    'total_bases' ,
                     'species_name',
                     'platform'    ,
                     'is_public'   ,
@@ -95,14 +141,15 @@ def printthisout(results):
         for tmpdict in results:
             sys.stdout.write(
                 "\t".join([
-                        tmpdict['runacc']    ,
-                        tmpdict['sciname']   ,
-                        tmpdict['platname']  ,
-                        tmpdict['ispublic']  ,
-                        tmpdict['strategy']  ,
-                        tmpdict['lib_source']
+                        tmpdict['runacc']     ,
+                        tmpdict['total_bases'],
+                        tmpdict['sciname']    ,
+                        tmpdict['platname']   ,
+                        tmpdict['ispublic']   ,
+                        tmpdict['strategy']   ,
+                        tmpdict['lib_source'] 
                     ]) + "\n"
-            )
+                )
             sys.stdout.flush()
 
 def main():
@@ -126,7 +173,7 @@ def main():
         sys.stdout.flush()
         exit()
 
-    results = formatmytype(mytype=mytype, countersamples=countersamples)
+    results = formatmytype(mytypes=mytype, countersamples=countersamples)
 
     printthisout(results)
 

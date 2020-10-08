@@ -120,6 +120,7 @@ def main():
         if opts.download:
             Datasets(dictString, out_dir= opts.outdir).iterate_genome()
             sys.stdout.write("\n")
+            sys.stdout.flush()
 
         else:
 
@@ -129,7 +130,8 @@ def main():
             frows  = dictToPrint(dictString)
 
             for r in frows:
-                print(r)
+                sys.stdout.write(r + "\n")
+                sys.stdout.flush()
 
     else:
         sys.stdout.write("\nNo data for %s\n" % opts.term)

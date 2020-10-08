@@ -1,6 +1,8 @@
 
 
 import re
+import sys
+import time
 import argparse
 import urllib.request
 from collections import Counter
@@ -96,18 +98,28 @@ class entrez:
         if not ids:
             return None
             
-        out = ""
+        out = []
         i   = 0
+        totallength = len(ids)
 
-        while i <= len(ids):
+        while i <= totallength:
+
+            if totallength > self.cache:
+                sys.stderr.write("\rDownloading metadata (%6.2f%%)" % (i*100/totallength) )
+                sys.stderr.flush()
 
             myids      = ",".join( ids[i:i + self.cache] )
             target_url = self.efetch_url + "&id=" + myids + "&rettype=" + self.type
             tmp_out    = urllib.request.urlopen(target_url).read().decode('utf-8')
+            time.sleep(0.75)
 
-            out += tmp_out
+            out += [tmp_out]
             i   += self.cache
 
+        if totallength > self.cache:
+            sys.stderr.write('\n')
+            sys.stderr.flush()
+            
         return out
 
     def get_seqs(self,
@@ -223,7 +235,7 @@ class entrez:
 
     def genomeDS(self):
 
-        docsum = self._get_type()
+        docsum = list(filter(None,self._get_type()))
 
         if not docsum:
             return None
@@ -233,17 +245,31 @@ class entrez:
 
         fulfill  = lambda d,n: {k: v + ( [""] * (n - len(v)) ) for k,v in d.items() }
 
-        sdocsum  = docsum.split("\n")
-        
+        # superout = {}
         out = {}
-        for i in sdocsum:
 
-            if not re.findall("</Item>$", i):
-                continue
+        for ds in docsum:
 
-            colname = re.sub(colpat, "\\1", i)
-            val     = re.sub(valpat, "\\1", i)
+            sdocsum  = ds.split("\n")
+                
+            for i in sdocsum:
 
-            out[colname] = out[colname] + [val] if out.__contains__(colname) else [val]
+                if not re.findall("</Item>$", i):
+                    continue
+
+                colname = re.sub(colpat, "\\1", i)
+                val     = re.sub(valpat, "\\1", i)
+
+                out[colname] = out[colname] + [val] if out.__contains__(colname) else [val]
             
-        return fulfill( out, self.getMaxNu(out) )        
+
+        return fulfill(out, self.getMaxNu(out)) 
+
+        # return superout
+
+
+# self = entrez(term = 'Salmoniformes',
+#                     db   = "sra",
+#                     type = "docsum",
+#                     cache=200)
+# self.type = 'docsum'
