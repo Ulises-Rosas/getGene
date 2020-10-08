@@ -18,7 +18,8 @@ setup(name="genetable",
       entry_points={
         'console_scripts': [
             'getgenomes  = genetable.getGenomes:main',
-            'getFeatures = genetable.geneTable:main'
+            'getFeatures = genetable.geneTable:main',
+            'looksra     = genetable.lookSRA:main'
             ]
       },
       install_requires=['matplotlib'],

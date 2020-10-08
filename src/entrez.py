@@ -20,41 +20,50 @@ class entrez:
                  printing = True):
 
         self.type = type
-        self.term = term.replace(" ", "%20") 
+        self.preterm = term.replace(" ", "%20")
+        # self.term = term.replace(" ", "%20") 
+        self.gene_string = gene_string
+
         self.db = db
         self.cache = cache
         self.printing = printing
-
-        termType = "[Organism]" if not re.findall("\[", self.term) else ""
-
-        if self.db == "nuccore":
-
-            if gene_string != "" and len(gene_string.split(",")) == 1:
-                gene_string = " OR ".join([i + "[All Fields]" for i in gene_string.split(",")])
-
-            elif gene_string != "" and len(gene_string.split(",")) > 1:
-                gene_string = "(" + \
-                       " OR ".join([i + "[All Fields]" for i in gene_string.split(",")]) + \
-                       ")"
-
-            if Lmin != "" and Lmax != "":
-                Lrange = "(" + str(Lmin) + "[SLEN] :" + str(Lmax) + "[SLEN])"
-            else:
-                Lrange = ""
-
-            self.term = re.sub(" ",
-                               "%20",
-                               " AND ".join(
-                                   [i for i in [self.term + termType, gene_string, Lrange] if i != ""]
-                                    )
-                               )
-
-        self.esarch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=" + \
-                          self.db + "&term=" + self.term
+        self.Lmin = Lmin
+        self.Lmax = Lmax
 
         self.efetch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=" + self.db
 
         self.ids = []
+
+    @property
+    def term(self):
+
+        if self.db != 'nuccore':
+            return self.preterm
+
+        termType = "[Organism]" if not re.findall("\\[", self.preterm) else ""
+
+        if self.gene_string:
+            genes       = self.gene_string.split(",")
+            genebool    = " OR ".join([i + "[All Fields]" for i in genes])
+            gene_string = genebool if len(genes) == 1 else "("+genebool+")"
+
+        else:
+            gene_string = self.gene_string
+
+        if self.Lmin != "" and self.Lmax != "":
+            Lrange = "(" + str(self.Lmin) + "[SLEN] :" + str(self.Lmax) + "[SLEN])"
+        else:
+            Lrange = ""
+
+        myopts = filter(None, [self.preterm + termType, gene_string, Lrange])
+
+        return " AND ".join(myopts).replace(" ", "%20")
+
+    @property
+    def esarch_url(self):
+
+        url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db="
+        return url + self.db + "&term=" + self.term
 
     def _get_ids(self):
 
@@ -73,7 +82,7 @@ class entrez:
 
         ids_page = urllib.request.urlopen(complete_esearch_url).read().decode('utf-8')
 
-        self.ids = [re.sub("<Id>([0-9\.]+)</Id>", "\\1", i) for i in re.findall("<Id>[0-9\.]+</Id>", ids_page)]
+        self.ids = [re.sub("<Id>([0-9\\.]+)</Id>", "\\1", i) for i in re.findall("<Id>[0-9\\.]+</Id>", ids_page)]
 
         return self.ids
 
@@ -92,10 +101,8 @@ class entrez:
 
         while i <= len(ids):
 
-            target_url = self.efetch_url + \
-                         "&id=" + ",".join( ids[i:i + self.cache] ) + \
-                         "&rettype=" + self.type
-    
+            myids      = ",".join( ids[i:i + self.cache] )
+            target_url = self.efetch_url + "&id=" + myids + "&rettype=" + self.type
             tmp_out    = urllib.request.urlopen(target_url).read().decode('utf-8')
 
             out += tmp_out
@@ -210,3 +217,33 @@ class entrez:
 
             return dict(sortedDict1) if cutOff is None else dict(sortedDict1[0:int(cutOff)])
 
+    def getMaxNu(self, mydict):
+
+        return sorted([len(v) for _,v in mydict.items()], reverse = True)[0]
+
+    def genomeDS(self):
+
+        docsum = self._get_type()
+
+        if not docsum:
+            return None
+
+        colpat   = '^.+Name="(.+)" .+>.{0,}</Item>$'
+        valpat   = '^.+Name=".+" .+>(.{0,})</Item>$'
+
+        fulfill  = lambda d,n: {k: v + ( [""] * (n - len(v)) ) for k,v in d.items() }
+
+        sdocsum  = docsum.split("\n")
+        
+        out = {}
+        for i in sdocsum:
+
+            if not re.findall("</Item>$", i):
+                continue
+
+            colname = re.sub(colpat, "\\1", i)
+            val     = re.sub(valpat, "\\1", i)
+
+            out[colname] = out[colname] + [val] if out.__contains__(colname) else [val]
+            
+        return fulfill( out, self.getMaxNu(out) )        
