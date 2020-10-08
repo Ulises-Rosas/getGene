@@ -28,11 +28,6 @@ def getOpts():
     args = parser.parse_args()
     return args
 
-
-rela = '<Summary><Title>Trace experiment for center ABC, GENOMIC, species SALMO SALAR SALMON_HC_PLASMID</Title><Platform instrument_model="AB 310 Genetic Analyzer">CAPILLARY</Platform><Statistics total_runs="1" total_spots="50128" total_bases="47861202" total_size="1359885140" load_done="true" cluster_name="public"/></Summary><Submitter acc="SRA902384" center_name="ABC" contact_name="Inna Belaia" lab_name="ABC"/><Experiment acc="SRX6104069" ver="1" status="public" name="Trace experiment for center ABC, GENOMIC, species SALMO SALAR SALMON_HC_PLASMID"/><Study acc="SRP202122" name="Sequencing SALMO SALAR"/><Organism taxid="8030" CommonName="Atlantic salmon"/><Sample acc="SRS5002493" name="Atlantic salmon"/><Instrument CAPILLARY="AB 310 Genetic Analyzer"/><Library_descriptor><LIBRARY_NAME>SALMON_HC_PLASMID</LIBRARY_NAME><LIBRARY_STRATEGY>WGA</LIBRARY_STRATEGY><LIBRARY_SOURCE>GENOMIC</LIBRARY_SOURCE><LIBRARY_SELECTION>unspecified</LIBRARY_SELECTION><LIBRARY_LAYOUT> <SINGLE/> </LIBRARY_LAYOUT></Library_descriptor><Biosample>SAMN12109122</Biosample>'
-
-re.findall('ScientificName=', rela)
-
 def checkmatch(mystr, exists, extract):
 
     return re.sub(extract, "\\1", mystr) if re.findall(exists,mystr) else ""
