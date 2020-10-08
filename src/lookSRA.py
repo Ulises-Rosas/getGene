@@ -115,7 +115,7 @@ def main():
             for i in f.readlines():
                 countersamples.append(i.strip())
                 
-    myclass = entrez(term = "opts.term",
+    myclass = entrez(term = opts.term,
                      db   = "sra",
                      type = "docsum")
 
