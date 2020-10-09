@@ -47,6 +47,7 @@ def formatmytype(mytypes, countersamples):
             if expxml:
                 # libsrcpatt = '.*<LIBRARY_SOURCE>(.+)</LIBRARY_SOURCE>.*'
                 # srcname    = re.sub(libsrcpatt, "\\1", expxml)
+                # print(expxml)
                 srcname = checkmatch(
                             expxml, 
                             '<LIBRARY_SOURCE>',
@@ -59,6 +60,15 @@ def formatmytype(mytypes, countersamples):
                                 '<LIBRARY_STRATEGY>',
                                 '.*<LIBRARY_STRATEGY>(.+)</LIBRARY_STRATEGY>.*'
                             )
+
+                rawlayout = checkmatch(
+                                expxml,
+                                '<LIBRARY_LAYOUT>',
+                                '.*<LIBRARY_LAYOUT>(.+)</LIBRARY_LAYOUT>.*'
+                            )
+                layout = re.sub("[ ]{0,1}<([A-Za-z]+).*","\\1",rawlayout).lower()
+                
+                
                 # platpatt = '.*instrument_model="(.*?)".*'
                 # platname = re.sub(platpatt, "\\1", expxml)
                 platname = checkmatch(
@@ -111,7 +121,8 @@ def formatmytype(mytypes, countersamples):
                     'ispublic'   : ispublic,
                     'strategy'   : straname,
                     'lib_source' : srcname,
-                    'total_bases': totalbase
+                    'total_bases': totalbase,
+                    'layout'     : layout
                 }
                 out.append(tmp)
 
@@ -124,6 +135,7 @@ def printthisout(results):
             "\t".join([
                     'accession'   ,
                     'total_bases' ,
+                    'layout'      ,
                     'species_name',
                     'platform'    ,
                     'is_public'   ,
@@ -138,6 +150,7 @@ def printthisout(results):
                 "\t".join([
                         tmpdict['runacc']     ,
                         tmpdict['total_bases'],
+                        tmpdict['layout']     ,
                         tmpdict['sciname']    ,
                         tmpdict['platname']   ,
                         tmpdict['ispublic']   ,
