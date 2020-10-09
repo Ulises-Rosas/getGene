@@ -268,8 +268,8 @@ class entrez:
         # return superout
 
 
-# self = entrez(term = 'Salmoniformes',
-#                     db   = "sra",
+# self = entrez(term = 'Clupeiformes',
+#                     db   = "genome",
 #                     type = "docsum",
 #                     cache=200)
 # self.type = 'docsum'

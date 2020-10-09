@@ -3,6 +3,7 @@ import re
 import os
 import io
 import sys
+import json
 import time
 import zipfile
 import requests
@@ -25,6 +26,7 @@ class Datasets:
         self.dictstring = dictstring
         self.threads    = threads
         self.out_dir    = out_dir
+        # self.taxon      = taxon
 
         self.base_url = "http://api.ncbi.nlm.nih.gov/datasets/v1alpha"
         self.ass_acc  = "download/assembly_accession"
@@ -43,9 +45,11 @@ class Datasets:
                     accession = None,
                     spps      = None):
 
-        down_url = os.path.join( self.base_url, 
-                                 self.ass_acc, 
-                                 self.data  % accession )
+        down_url = "/".join([
+                         self.base_url, 
+                         self.ass_acc, 
+                         self.data  % accession
+                        ])
 
         response = requests.get( down_url, headers = self.header ) 
 
@@ -55,8 +59,8 @@ class Datasets:
 
             final = time.time()
             if (final - start) > timeout:
-                sys.stdout.write("\nTimeout response: %s" % spps)
-                sys.stdout.flush()
+                sys.stderr.write("\nTimeout response: %s" % spps)
+                sys.stderr.flush()
                 return
 
         sys.stdout.write("\nDownloaded genome: %s" % spps)
@@ -100,6 +104,86 @@ class Datasets:
                 [ *p.map(self._move_file, myfiles) ]
 
                 shutil.rmtree("ncbi_dataset")
+
+    def taxon_descriptor(self,
+                         timeout = 60,
+                         spps    = None):
+        # spps    = 'Argentiniformes'
+        req_url = "/".join([
+                        self.base_url,
+                        'genome/taxon/%s?limit=all&returned_content=COMPLETE' % spps.replace(" ", "%20")
+                        ])
+
+        response = requests.get( req_url, headers = {"accept": "application/json"} ) 
+
+        start = time.time()
+        while not response.ok:
+            time.sleep(0.5)
+
+            tmpload = {}
+            try:
+                tmpload = json.loads(response.content)
+            except json.JSONDecodeError:
+                continue
+
+            if tmpload:
+                if tmpload.__contains__('error'):
+                    sys.stderr.write(tmpload['message'] + "\n")
+                    sys.stderr.flush()
+                    return None
+                else:
+                    continue
+
+            final = time.time()
+            if (final - start) > timeout:
+                sys.stderr.write("\nTimeout response: %s" % spps)
+                sys.stderr.flush()
+                return None
+        # sys.stdout.write("\nDownloaded genome: %s" % spps)
+        # sys.stdout.flush()
+        loaded = json.loads(response.content)
+
+        if not loaded:
+            sys.stderr.write("\nNo data for %s\n" % spps)
+            sys.stderr.flush()
+            return None
+
+        out = []
+
+        checkkey = lambda json, key: json[key] if json.__contains__(key) else ''
+
+        for li in loaded['assemblies']:
+
+            assem = checkkey(li,'assembly')
+
+            if not assem:
+                continue
+
+            accession  = checkkey(assem, 'assembly_accession')
+            seq_length = checkkey(assem, 'seq_length')
+            n50        = checkkey(assem, 'contig_n50')
+            ass_level  = checkkey(assem, 'assembly_level')
+
+            org = checkkey(assem, 'org')
+
+            if not org:
+                continue
+            sci_name = checkkey(org, 'sci_name')
+
+            out.append({
+                'accession'  : accession,
+                'seq_length' : seq_length,
+                'conting_n50': n50,
+                'ass_level'  : ass_level,
+                'sci_name'   : sci_name
+                })
+
+        return out
+
+
+# self = Datasets(out_dir="genome_out")
+
+
 
 
 # if __name__ == "__main__":

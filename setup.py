@@ -17,7 +17,7 @@ setup(name="genetable",
       package_dir = {'genetable': 'src'},
       entry_points={
         'console_scripts': [
-            'getgenomes  = genetable.getGenomes:main',
+            'lookgenomes  = genetable.lookgenomes:main',
             'getFeatures = genetable.geneTable:main',
             'looksra     = genetable.lookSRA:main'
             ]
