@@ -24,11 +24,24 @@ python3 setup.py install
 Get gene availability and plot it (i.e. `-p`).
 
 ```Shell
-getFeatures "Alopias vulpinus" -p
+lookfeatures "Alopias vulpinus"
 ```
-![](https://github.com/Ulises-Rosas/geneTable/blob/master/img/Alopias_vulpinus_getFeatures.png)
+```
+coi	47
+nd2	14
+hsp70	11
+12s ribosomal rna	7
+trna-leu	6
+16s ribosomal rna	6
+trna-ser	6
+trna-val	5
+trna-phe	4
+cytb	4
+```
 
-Filnames are composed by using species name as well as its title by default. Horizontal line depicts three sequences. If there were more than 200 hundred NCBI ids per species, the number of downloaded tables per species is controled with the argument `--cache`.
+<!-- ![](https://github.com/Ulises-Rosas/geneTable/blob/master/img/Alopias_vulpinus_getFeatures.png)
+ -->
+Filnames are composed by using species name as well as its title by default. If there were more than 200 hundred NCBI ids per species, the number of downloaded tables per species is controled with the argument `--cache`.
 
 ### lookgenomes
 

@@ -7,7 +7,7 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 setup(name="genetable",
-      version='0.3',
+      version='0.4',
       author='Ulises Rosas',
       long_description = readme,
       long_description_content_type = 'text/markdown',
@@ -17,13 +17,13 @@ setup(name="genetable",
       package_dir = {'genetable': 'src'},
       entry_points={
         'console_scripts': [
-            'getFeatures = genetable.geneTable:main',
+            'lookfeatures = genetable.geneTable:main',
             'lookgenomes = genetable.lookgenomes:main',
             'looksra     = genetable.lookSRA:main',
             'getgenomes  = genetable.getgenomes:main',
             ]
       },
-      install_requires=['matplotlib', 'requests'],
+      install_requires=['requests'],
       classifiers = [
              'Programming Language :: Python :: 3',
              'License :: OSI Approved :: MIT License'
