@@ -19,9 +19,9 @@ python3 setup.py install
 ## Usage
 
 
-### getFeatures
+### lookfeatures
 
-Get gene availability and plot it (i.e. `-p`).
+Get gene availability
 
 ```Shell
 lookfeatures "Alopias vulpinus"
