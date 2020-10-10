@@ -94,7 +94,7 @@ class Datasets:
                                     "ncbi_dataset",
                                     "data",
                                     acc,
-                                    "*_genomic.fna"))
+                                    "*.fna"))
 
                 [ *p.map(self._move_file, myfiles) ]
 
