@@ -78,7 +78,7 @@ cat listacc.txt
 GCF_001319825.1,Yersinia wautersii
 GCF_000493475.1,Yersinia wautersii
 ```
-We can genomes from it by using:
+We can get genomes from that file by using:
 
 ```
 getgenomes listAcc.txt 
