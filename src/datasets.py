@@ -19,13 +19,12 @@ from multiprocessing import Pool
 
 class Datasets:
     def __init__(self,
-                 dictstring = None,
-                 out_dir = None,
+                 request = None,
                  threads = 1):
 
-        self.dictstring = dictstring
-        self.threads    = threads
-        self.out_dir    = out_dir
+        self.request = request
+        self.threads = threads
+        # self.out_dir  = out_dir
         # self.taxon      = taxon
 
         self.base_url = "http://api.ncbi.nlm.nih.gov/datasets/v1alpha"
@@ -45,11 +44,18 @@ class Datasets:
                     accession = None,
                     spps      = None):
 
+        # accession  = 'GCF_001319825.1'
+        # spps = 'Yersinia wautersii'
+        # mydirname = (spps + "__" + accession).replace(" ", "_")
+
         down_url = "/".join([
                          self.base_url, 
                          self.ass_acc, 
                          self.data  % accession
                         ])
+
+        sys.stdout.write("Downloading: %s, %s\n" % (spps, accession))
+        sys.stdout.flush()
 
         response = requests.get( down_url, headers = self.header ) 
 
@@ -59,56 +65,53 @@ class Datasets:
 
             final = time.time()
             if (final - start) > timeout:
-                sys.stderr.write("\nTimeout response: %s" % spps)
+                sys.stderr.write("Timeout response: %s, %s\n" % (spps, accession))
                 sys.stderr.flush()
-                return
-
-        sys.stdout.write("\nDownloaded genome: %s" % spps)
-        sys.stdout.flush()
+                return None
         
         myzip = zipfile.ZipFile( io.BytesIO(response.content) )
-        myzip.extractall()
+        myzip.extractall(self.sppsdir)
+
+        return 1
 
     def iterate_genome(self):
 
-        mydict = self.dictstring
-        out_dir = self.out_dir
-
-        if not os.path.isdir( out_dir ):
-            os.mkdir( out_dir )
-
+        # Multiprocess for moving files
         with Pool(processes = self.threads) as p:
 
-            for n, spps in enumerate( mydict['Organism_Name'] ):
+            for acc, spps in self.request:
+                # acc = 'GCF_001319825.1'
+                # spps = 'Yersinia wautersii'
+                self.sppsdir = (spps + "__" + acc).replace(" ", "_")
+                stat_ok      = self._get_genome(accession=acc, spps=spps)
 
-                ass_acc = mydict['Assembly_Accession'][n]
-
-                if not ass_acc:
-                    continue
-
-                self._get_genome(accession=ass_acc, spps=spps)
-                self.sppsdir = os.path.join( out_dir, spps.replace(" ", "_") )
-
-                if not os.path.isdir( self.sppsdir ):
-                    os.mkdir( self.sppsdir )
+                if not stat_ok:
+                    continue                
 
                 myfiles  = glob.glob(
-                            os.path.join(
-                                "ncbi_dataset",
-                                "data",
-                                ass_acc,
-                                "*_genomic.fna"
-                            )
-                        )
+                                os.path.join(
+                                    self.sppsdir,
+                                    "ncbi_dataset",
+                                    "data",
+                                    acc,
+                                    "*_genomic.fna"))
 
                 [ *p.map(self._move_file, myfiles) ]
 
-                shutil.rmtree("ncbi_dataset")
+                shutil.rmtree(
+                        os.path.join(
+                            self.sppsdir,
+                            "ncbi_dataset"))
 
+                readmefil = os.path.join(self.sppsdir, 'README.md')
+
+                if os.path.exists(readmefil):
+                    os.remove(readmefil)
+                
     def taxon_descriptor(self,
                          timeout = 60,
                          spps    = None):
-        # spps    = 'Argentiniformes'
+        # spps    = 'Yersinia wautersii'
         req_url = "/".join([
                         self.base_url,
                         'genome/taxon/%s?limit=all&returned_content=COMPLETE' % spps.replace(" ", "%20")
@@ -168,40 +171,18 @@ class Datasets:
 
             if not org:
                 continue
+
             sci_name = checkkey(org, 'sci_name')
+            title    = checkkey(org, 'title')
 
             out.append({
                 'accession'  : accession,
                 'seq_length' : seq_length,
                 'conting_n50': n50,
                 'ass_level'  : ass_level,
-                'sci_name'   : sci_name
+                'sci_name'   : sci_name,
+                'title'      : title
                 })
 
         return out
 
-
-# self = Datasets(out_dir="genome_out")
-
-
-
-
-# if __name__ == "__main__":
-    # term = "yersinia"
-    # rawOut = entrez(
-    #             term = term, # opts.term
-    #             db   = "genome" ,
-    #             type = "docsum")
-
-    # rawString = rawOut._get_type()
-
-    # if rawString is not None:
-    #     # rowString  = rawOut._get_type()
-    #     dictString = genomeDS(rawString)
-
-    #     Datasets(dictString , out_dir= "genome_out").iterate_genome()
-    # else:
-    #     sys.stdout.write("\nCheck term: %s" % term)
-    #     sys.stdout.flush()
-
-    # sys.stdout.write("\n")

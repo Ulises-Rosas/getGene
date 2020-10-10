@@ -17,9 +17,10 @@ setup(name="genetable",
       package_dir = {'genetable': 'src'},
       entry_points={
         'console_scripts': [
-            'lookgenomes  = genetable.lookgenomes:main',
             'getFeatures = genetable.geneTable:main',
-            'looksra     = genetable.lookSRA:main'
+            'lookgenomes = genetable.lookgenomes:main',
+            'looksra     = genetable.lookSRA:main',
+            'getgenomes  = genetable.getgenomes:main',
             ]
       },
       install_requires=['matplotlib'],

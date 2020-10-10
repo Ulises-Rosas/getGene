@@ -20,11 +20,14 @@ def getOpts():
 
         * Look genomes of Yersinia:
 
-            $ getGenomes.py Yersinia
+            $ lookgenomes Yersinia
                     
         * Filter 'Organism_Name' names by using list of names:
 
-            $ getGenomes.py Yersinia -c [counter sample file]
+            $ lookgenomes Yersinia -c [counter sample file]
+
+            Note: Counter samples is a list of non-target 
+                  species in plain text
 """)
     parser.add_argument('term',
                         help='Term')
@@ -32,22 +35,7 @@ def getOpts():
                         metavar="",
                         action='store',
                         default=None,
-                        help='[Optional] File with counter "Organism_Name"')                        
-    parser.add_argument('-d','--download',
-                        action="store_true",
-                        help='[Optional] if selected, genomes are downloaded')
-    # parser.add_argument('-s','--columns',
-    #                     action='store',
-    #                     metavar="",
-    #                     nargs= "+",
-    #                     default=SECOL,
-    #                     help='''[Optional] This specify columns. If None, all columns are presented [Default = %s]''' % SECOL)
-    parser.add_argument('-o','--outdir',
-                        metavar="",
-                        action='store',
-                        default=OUTDIR,
-                        help='[Optional] directory names where genomes will be store [Default = %s]' % OUTDIR)
-
+                        help='[Optional] File with counter samples')
     args = parser.parse_args()
     return args
 
@@ -56,11 +44,12 @@ def printthisout(results):
     if results:
         sys.stdout.write(
             "\t".join([
-                    'accession'   ,
-                    'seq_length'  ,
-                    'conting_n50' ,
-                    'sci_name'    ,
-                    'ass_level'
+                    'accession'     ,
+                    'seq_length'    ,
+                    'conting_n50'   ,
+                    'sci_name'      ,
+                    'assembly_level',
+                    'title'
                 ]) + "\n"
             )
         sys.stdout.flush()
@@ -68,20 +57,19 @@ def printthisout(results):
         for tmpdict in results:
             sys.stdout.write(
                 "\t".join([
-                        tmpdict['accession']   ,
-                        tmpdict['seq_length']  ,
-                        str(tmpdict['conting_n50']) ,
-                        tmpdict['sci_name']    ,
-                        tmpdict['ass_level']
+                        tmpdict['accession']       ,
+                        tmpdict['seq_length']      ,
+                        str(tmpdict['conting_n50']),
+                        tmpdict['sci_name']        ,
+                        tmpdict['ass_level']       ,
+                        tmpdict['title']
                     ]) + "\n"
                 )
             sys.stdout.flush()
 
 
 def filtercounter(rawOut, counterspps):
-
-    counterspps = ['Denticeps clupeoides']
-
+    # counterspps = ['Denticeps clupeoides']
     out = []
 
     for mydict in rawOut:
@@ -89,6 +77,7 @@ def filtercounter(rawOut, counterspps):
 
         if not tmpspps in counterspps:
             out.append(mydict)
+            
     return out
 
 def main():
