@@ -1,8 +1,14 @@
+[![pypi](https://img.shields.io/pypi/v/genetable.svg)](https://pypi.python.org/pypi/genetable)
+
 # geneGet
 
 ## Installation
 
-Using `git`:
+```shell
+pip install genetable
+```
+
+Alternatively:
 
 ```Shell
 git clone https://github.com/Ulises-Rosas/geneTable.git
