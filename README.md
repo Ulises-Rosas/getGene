@@ -21,7 +21,7 @@ python3 setup.py install
 
 ### lookfeatures
 
-Get gene availability
+Look at features availability
 
 ```Shell
 lookfeatures "Alopias vulpinus"
