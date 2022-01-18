@@ -1,6 +1,6 @@
 [![pypi](https://img.shields.io/pypi/v/genetable.svg)](https://pypi.python.org/pypi/genetable)
 
-# geneGet
+# getGene
 
 ## Installation
 
@@ -19,9 +19,9 @@ pip install .
 ## Usage
 
 
-### getFeatures
+### lookfeatures
 
-Get gene availability and plot it (i.e. `-p`).
+Look at features availability
 
 ```Shell
 lookfeatures "Alopias vulpinus"
@@ -101,10 +101,11 @@ We can get genomes from that file by using:
 
 ```
 getgenomes listAcc.txt 
-
+```
+Then, we can check the recently downloaded genome:
+```
 head Yersinia_wautersii__GCF_001319825.1/GCF_001319825.1_5139_1_1_genomic.fna
-```
-```
+
 >NZ_CVMG01000001.1 Yersinia wautersii strain WP-931201, whole genome shotgun sequence
 ATGGCCCACGGTGGAAAACTGGCCACAGGTTGAGTTGCCGGAACTGCCGCAATGGCTTTTGATTGAAGCGGTCAATCAGG
 GTTATATTGTTCCCGACTGGCCGCCAGTCGTATAGGCCTGCCCAACAACCCCTCCAGTCGGGGTTGTTGGTTTCTCTGTT
