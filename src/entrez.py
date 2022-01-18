@@ -6,7 +6,7 @@ import time
 import argparse
 import urllib.request
 from collections import Counter
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from genetable.utils import GenesftByText
 
 class entrez:

@@ -15,7 +15,7 @@ def getOpts():
 
         * Get metadata from a given term:
 
-            $ lookSRA.py 'Yersinia intermedia'
+            $ looksra 'Yersinia intermedia'
 
 """)
     parser.add_argument('term',

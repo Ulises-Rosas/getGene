@@ -13,7 +13,7 @@ Alternatively:
 ```Shell
 git clone https://github.com/Ulises-Rosas/geneTable.git
 cd geneTable
-python3 setup.py install
+pip install .
 ```
 
 ## Usage

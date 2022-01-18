@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-from  entrez import entrez
+from  genetable.entrez import entrez
 
 def getOpts():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -84,6 +84,7 @@ def main():
     if opts["out"] is None:
         classEntry.get_seqs()
     else:
+        out = classEntry._get_ids()
         printOutput(out, opts["out"])
 
 if __name__ == "__main__":
